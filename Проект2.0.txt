@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>КиберЩит — Безопасность домашних Wi-Fi сетей</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg-dark: #0a0e27;
+    --bg-card: rgba(255, 255, 255, 0.07);
+    --accent: #00f0ff;
+    --accent-2: #b537f2;
+    --text: #e4e6eb;
+    --text-dim: #c8cde0;
+    --danger: #ff4757;
+    --success: #2ed573;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+    background: var(--bg-dark);
+  }
+
+  /* Фоновое изображение пейзажа */
+  .bg-layer {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -2;
+    background-image: url('https://images.unsplash.com/photo-1449844908441-8829872d2607?auto=format&fit=crop&w=1920&q=80');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    animation: bgZoom 30s ease-in-out infinite alternate;
+  }
+
+  @keyframes bgZoom {
+    from { transform: scale(1); }
+    to { transform: scale(1.08); }
+  }
+
+  /* Тёмный градиентный оверлей для читаемости */
+  .bg-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+    background: 
+      linear-gradient(180deg, 
+        rgba(10, 14, 39, 0.85) 0%, 
+        rgba(10, 14, 39, 0.75) 40%, 
+        rgba(10, 14, 39, 0.9) 100%),
+      radial-gradient(circle at 20% 30%, rgba(0, 240, 255, 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 70%, rgba(181, 55, 242, 0.15) 0%, transparent 50%);
+  }
+
+  /* Шапка */
+  header {
+    padding: 20px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(15px);
+    background: rgba(10, 14, 39, 0.6);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+  }
+
+  .logo {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    -webkit-text-fill-color: white;
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.4);
+  }
+
+  nav ul {
+    display: flex;
+    gap: 30px;
+    list-style: none;
+  }
+
+  nav a {
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.3s;
+    font-size: 0.95rem;
+    position: relative;
+  }
+
+  nav a:hover { color: var(--accent); }
+
+  nav a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px; left: 0;
+    width: 0; height: 2px;
+    background: var(--accent);
+    transition: width 0.3s;
+  }
+
+  nav a:hover::after { width: 100%; }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    padding: 100px 20px 70px;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .hero-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--accent);
+    margin-bottom: 25px;
+    backdrop-filter: blur(10px);
+  }
+
+  .hero h1 {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    margin-bottom: 20px;
+    line-height: 1.2;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 50%, var(--accent-2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--text);
+    max-width: 700px;
+    margin: 0 auto 30px;
+    line-height: 1.6;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+  }
+
+  .stat {
+    text-align: center;
+    padding: 20px 30px;
+    background: rgba(10, 14, 39, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(0, 240, 255, 0.2);
+    border-radius: 16px;
+    min-width: 160px;
+  }
+
+  .stat-num {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    display: block;
+  }
+
+  .stat-label {
+    color: var(--text);
+    font-size: 0.9rem;
+  }
+
+  /* Секции */
+  section {
+    padding: 70px 5%;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    text-align: center;
+    font-size: 2.3rem;
+    margin-bottom: 15px;
+    background: linear-gradient(90deg, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .section-subtitle {
+    text-align: center;
+    color: var(--text);
+    margin-bottom: 50px;
+    font-size: 1.05rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Сетка иконок */
+  .icons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+  }
+
+  .icon-card {
+    background: rgba(10, 14, 39, 0.6);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 35px 25px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .icon-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.15), transparent);
+    transition: left 0.6s;
+  }
+
+  .icon-card:hover::before { left: 100%; }
+
+  .icon-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--accent);
+    box-shadow: 0 15px 40px rgba(0, 240, 255, 0.3);
+    background: rgba(10, 14, 39, 0.8);
+  }
+
+  .icon-emoji {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    display: inline-block;
+    transition: transform 0.3s;
+    filter: drop-shadow(0 0 10px rgba(0, 240, 255, 0.3));
+  }
+
+  .icon-card:hover .icon-emoji {
+    transform: scale(1.15) rotate(-5deg);
+  }
+
+  .icon-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 8px;
+    color: #fff;
+  }
+
+  .icon-card p {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+
+  .click-hint {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 5px 12px;
+    background: rgba(0, 240, 255, 0.1);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
+
+  /* Рекомендации */
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .tip-card {
+    background: rgba(10, 14, 39, 0.6);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(46, 213, 115, 0.25);
+    border-radius: 16px;
+    padding: 25px;
+    transition: transform 0.3s;
+  }
+
+  .tip-card:hover { 
+    transform: translateX(5px);
+    border-color: var(--success);
+    box-shadow: 0 10px 30px rgba(46, 213, 115, 0.2);
+  }
+
+  .tip-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .tip-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--success), var(--accent));
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .tip-card h3 {
+    font-size: 1.1rem;
+    color: #fff;
+  }
+
+  .tip-card p {
+    color: var(--text);
+    line-height: 1.6;
+    font-size: 0.95rem;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+  }
+
+  /* Модальное окно */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+    animation: fadeIn 0.3s;
+  }
+
+  .modal-overlay.active { display: flex; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .modal {
+    background: linear-gradient(135deg, rgba(20, 26, 58, 0.95) 0%, rgba(10, 14, 39, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 240, 255, 0.4);
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 550px;
+    width: 100%;
+    position: relative;
+    animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 25px 60px rgba(0, 240, 255, 0.25);
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 15px; right: 15px;
+    width: 35px; height: 35px;
+    background: rgba(255, 71, 87, 0.15);
+    border: 1px solid rgba(255, 71, 87, 0.3);
+    border-radius: 50%;
+    color: var(--danger);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .modal-close:hover {
+    background: var(--danger);
+    color: white;
+    transform: rotate(90deg);
+  }
+
+  .modal-icon {
+    font-size: 4rem;
+    text-align: center;
+    margin-bottom: 15px;
+    filter: drop-shadow(0 0 20px rgba(0, 240, 255, 0.5));
+  }
+
+  .modal h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .modal-content {
+    color: var(--text);
+    line-height: 1.7;
+    font-size: 1rem;
+  }
+
+  .modal-content ul {
+    margin-top: 15px;
+    padding-left: 20px;
+  }
+
+  .modal-content li {
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .risk-badge {
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0 auto 20px;
+  }
+
+  .risk-high { background: rgba(255, 71, 87, 0.2); color: var(--danger); border: 1px solid var(--danger); }
+  .risk-medium { background: rgba(255, 165, 2, 0.2); color: #ffa502; border: 1px solid #ffa502; }
+  .risk-low { background: rgba(46, 213, 115, 0.2); color: var(--success); border: 1px solid var(--success); }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text);
+    font-size: 0.9rem;
+    margin-top: 60px;
+    background: rgba(10, 14, 39, 0.6);
+    backdrop-filter: blur(10px);
+  }
+
+  @media (max-width: 768px) {
+    nav ul { display: none; }
+    .stats { gap: 15px; }
+    .stat { padding: 15px 20px; min-width: 130px; }
+    .stat-num { font-size: 2rem; }
+    .bg-layer { background-attachment: scroll; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Фоновый пейзаж -->
+<div class="bg-layer"></div>
+<div class="bg-overlay"></div>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🛡️</div>
+    <span>КиберЩит</span>
+  </div>
+  <nav>
+    <ul>
+      <li><a href="#threats">Угрозы</a></li>
+      <li><a href="#tips">Защита</a></li>
+      <li><a href="#about">О проекте</a></li>
+    </ul>
+  </nav>
+</header>
+
+<section class="hero">
+  <span class="hero-badge">🔒 Защита вашего цифрового дома</span>
+  <h1>КиберЩит: безопасность вашей Wi-Fi сети</h1>
+  <p>Узнайте, какие угрозы подстерегают вашу домашнюю сеть, и как защитить личные данные от злоумышленников. Нажмите на иконки ниже, чтобы получить подробную информацию.</p>
+  
+  <div class="stats">
+    <div class="stat">
+      <span class="stat-num">73%</span>
+      <span class="stat-label">домашних сетей уязвимы</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">15 сек</span>
+      <span class="stat-label">взлом слабого пароля</span>
+    </div>
+    <div class="stat">
+      <span class="stat-num">24/7</span>
+      <span class="stat-label">угроза из интернета</span>
+    </div>
+  </div>
+</section>
+
+<section id="threats">
+  <h2 class="section-title">⚠️ Основные угрозы</h2>
+  <p class="section-subtitle">Нажмите на любую иконку, чтобы узнать подробности</p>
+  
+  <div class="icons-grid">
+    <div class="icon-card" onclick="openModal('weak-pass')">
+      <div class="icon-emoji">🔑</div>
+      <h3>Слабый пароль</h3>
+      <p>Легко взламывается</p>
+      <span class="click-hint">👆 Нажми</span>
+    </div>
+
+    <div class="icon-card" onclick="openModal('wpa')">
+      <div class="icon-emoji">📡</div>
+      <h3>Устаревший протокол</h3>
+      <p>WEP / WPA уязвимы</p>
+      <span class="click-hint">👆 Нажми</span>
+    </div>
+
+    <div class="icon-card" onclick="openModal('evil-twin')">
+      <div class="icon-emoji">👥</div>
+      <h3>Злой близнец</h3>
+      <p>Фальшивая точка доступа</p>
+      <span class="click-hint">👆 Нажми</span>
+    </div>
+
+    <div class="icon-card" onclick="openModal('sniffing')">
+      <div class="icon-emoji">👁️</div>
+      <h3>Перехват трафика</h3>
+      <p>Шпионаж за данными</p>
+      <span class="click-hint">👆 Нажми</span>
+    </div>
+
+    <div class="icon-card" onclick="openModal('router')">
+      <div class="icon-emoji">📶</div>
+      <h3>Уязвимый роутер</h3>
+      <p>Старая прошивка</p>
+      <span class="click-hint">👆 Нажми</span>
+    </div>
+
+    <div class="icon-card" onclick="openModal('open-net')">
+      <div class="icon-emoji">🌐</div>
+      <h3>Открытая сеть</h3>
+      <p>Без шифрования</p>
+      <span class="click-hint">👆 Нажми</span>
+    </div>
+
+    <div class="icon-card" onclick="openModal('wps')">
+      <div class="icon-emoji">🔌</div>
+      <h3>WPS уязвимость</h3>
+      <p>Кнопка быстрого входа</p>
+      <span class="click-hint">👆 Нажми</span>
+    </div>
+
+    <div class="icon-card" onclick="openModal('iot')">
+      <div class="icon-emoji">🏠</div>
+      <h3>IoT устройства</h3>
+      <p>Умный дом — слабое звено</p>
+      <span class="click-hint">👆 Нажми</span>
+    </div>
+  </div>
+</section>
+
+<section id="tips">
+  <h2 class="section-title">✅ Рекомендации по защите</h2>
+  <p class="section-subtitle">Простые шаги для максимальной безопасности</p>
+  
+  <div class="tips-grid">
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon">🔐</div>
+        <h3>Используйте WPA3</h3>
+      </div>
+      <p>Обновите протокол шифрования до WPA3 или как минимум WPA2-AES. Это самый надёжный стандарт защиты.</p>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon">💪</div>
+        <h3>Сложный пароль</h3>
+      </div>
+      <p>Минимум 12 символов: буквы разного регистра, цифры, спецсимволы. Не используйте имена и даты.</p>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon">🔄</div>
+        <h3>Обновляйте прошивку</h3>
+      </div>
+      <p>Регулярно проверяйте обновления роутера. Производители закрывают уязвимости в новых версиях.</p>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon">📛</div>
+        <h3>Смените имя сети</h3>
+      </div>
+      <p>Не используйте имя по умолчанию (TP-Link_XXXX). Оно выдаёт модель роутера и упрощает атаку.</p>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon">🚫</div>
+        <h3>Отключите WPS</h3>
+      </div>
+      <p>Функция быстрого подключения имеет серьёзные уязвимости. Лучше использовать её только при необходимости.</p>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon">👥</div>
+        <h3>Гостевая сеть</h3>
+      </div>
+      <p>Создайте отдельную сеть для гостей и IoT-устройств. Это изолирует их от ваших личных данных.</p>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon">📍</div>
+        <h3>Расположение роутера</h3>
+      </div>
+      <p>Разместите роутер в центре дома, подальше от окон. Это уменьшит зону покрытия за пределами жилья.</p>
+    </div>
+
+    <div class="tip-card">
+      <div class="tip-header">
+        <div class="tip-icon">🔥</div>
+        <h3>Включите файрвол</h3>
+      </div>
+      <p>Активируйте встроенный межсетевой экран роутера. Он блокирует подозрительные подключения извне.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Модальное окно -->
+<div class="modal-overlay" id="modal" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-icon" id="modalIcon"></div>
+    <h2 id="modalTitle"></h2>
+    <div id="modalRisk" style="text-align:center;"></div>
+    <div class="modal-content" id="modalContent"></div>
+  </div>
+</div>
+
+<footer id="about">
+  <p>🛡️ <b>КиберЩит</b> © 2026 — Образовательный проект о безопасности домашних сетей</p>
+  <p style="margin-top: 10px; font-size: 0.85rem; opacity: 0.8;">Защитите свой цифровой дом уже сегодня</p>
+</footer>
+
+<script>
+  const threats = {
+    'weak-pass': {
+      icon: '🔑',
+      title: 'Слабый пароль Wi-Fi',
+      risk: 'high',
+      content: `
+        <p>Пароли вроде <b>12345678</b>, <b>password</b> или <b>qwerty</b> взламываются за секунды с помощью брутфорс-атак.</p>
+        <ul>
+          <li>⚡ Программы типа Hashcat перебирают миллионы комбинаций</li>
+          <li>📋 Использование словарных слов ускоряет взлом в 100 раз</li>
+          <li>🔓 После взлома злоумышленник получает доступ ко всей сети</li>
+        </ul>
+        <p style="margin-top:15px;"><b>Решение:</b> пароль минимум 12 символов с буквами, цифрами и знаками.</p>
+      `
+    },
+    'wpa': {
+      icon: '📡',
+      title: 'Устаревший протокол шифрования',
+      risk: 'high',
+      content: `
+        <p>Протоколы <b>WEP</b> и <b>WPA</b> (первого поколения) имеют известные уязвимости и взламываются за минуты.</p>
+        <ul>
+          <li>🔧 WEP можно взломать программой Aircrack-ng за 2-10 минут</li>
+          <li>💔 WPA уязвим к атаке KRACK (обнаружена в 2017)</li>
+          <li>📊 Весь трафик можно перехватить и расшифровать</li>
+        </ul>
+        <p style="margin-top:15px;"><b>Решение:</b> переключитесь на WPA2-AES или WPA3 в настройках роутера.</p>
+      `
+    },
+    'evil-twin': {
+      icon: '👥',
+      title: 'Атака "Злой близнец"',
+      risk: 'high',
+      content: `
+        <p>Злоумышленник создаёт фальшивую точку доступа с тем же именем, что и ваша домашняя сеть.</p>
+        <ul>
+          <li>🎭 Устройства автоматически подключаются к более сильному сигналу</li>
+          <li>📧 Перехватываются логины, пароли, банковские данные</li>
+          <li>🕵️ Часто используется в общественных местах, но работает и дома</li>
+        </ul>
+        <p style="margin-top:15px;"><b>Решение:</b> проверяйте MAC-адрес точки подключения, используйте HTTPS.</p>
+      `
+    },
+    'sniffing': {
+      icon: '👁️',
+      title: 'Перехват трафика (Sniffing)',
+      risk: 'medium',
+      content: `
+        <p>При слабом шифровании злоумышленник в радиусе действия сети может перехватывать все передаваемые данные.</p>
+        <ul>
+          <li>📡 Программы Wireshark, tcpdump фиксируют пакеты</li>
+          <li>🔍 Анализируется посещённые сайты, запросы, файлы</li>
+          <li>💳 Незашифрованные данные (HTTP) читаются напрямую</li>
+        </ul>
+        <p style="margin-top:15px;"><b>Решение:</b> WPA3 шифрует каждый пакет индивидуально.</p>
+      `
+    },
+    'router': {
+      icon: '📶',
+      title: 'Уязвимости роутера',
+      risk: 'high',
+      content: `
+        <p>Роутер — главный страж вашей сети. Устаревшая прошивка содержит десятки известных дыр.</p>
+        <ul>
+          <li>🐛 CVE-уязвимости позволяют получить полный контроль</li>
+          <li>🔑 Заводские логины admin/admin не меняются пользователями</li>
+          <li>🌐 Открытые порты (UPnP) дают доступ из интернета</li>
+        </ul>
+        <p style="margin-top:15px;"><b>Решение:</b> меняйте пароль админки, обновляйте прошивку, отключайте UPnP.</p>
+      `
+    },
+    'open-net': {
+      icon: '🌐',
+      title: 'Открытая сеть без пароля',
+      risk: 'high',
+      content: `
+        <p>Сеть без шифрования — приглашение для всех желающих. Любой в радиусе действия подключается бесплатно.</p>
+        <ul>
+          <li>👀 Весь ваш трафик виден соседям и прохожим</li>
+          <li>💸 Использование вашего интернета для нелегальных действий</li>
+          <li>🦠 Внедрение вредоносных устройств в вашу сеть</li>
+        </ul>
+        <p style="margin-top:15px;"><b>Решение:</b> всегда включайте WPA2/WPA3 шифрование.</p>
+      `
+    },
+    'wps': {
+      icon: '🔌',
+      title: 'Уязвимость WPS',
+      risk: 'medium',
+      content: `
+        <p>WPS (Wi-Fi Protected Setup) — функция быстрого подключения кнопкой или PIN-кодом. PIN состоит всего из 8 цифр.</p>
+        <ul>
+          <li>🔢 PIN проверяется двумя частями — это снижает сложность до 11 000 комбинаций</li>
+          <li>⚡ Взлом занимает от 4 до 10 часов</li>
+          <li>🎯 Утилиты Reaver, Bully автоматизируют процесс</li>
+        </ul>
+        <p style="margin-top:15px;"><b>Решение:</b> отключите WPS в настройках роутера.</p>
+      `
+    },
+    'iot': {
+      icon: '🏠',
+      title: 'Умные устройства (IoT)',
+      risk: 'medium',
+      content: `
+        <p>Камеры, лампочки, чайники с Wi-Fi часто имеют слабую защиту и становятся точкой входа в сеть.</p>
+        <ul>
+          <li>🔓 Заводские пароли не меняются пользователями</li>
+          <li>🦠 Устройство может быть включено в ботнет (Mirai)</li>
+          <li>🎥 Камеры наблюдения — лакомый кусок для хакеров</li>
+        </ul>
+        <p style="margin-top:15px;"><b>Решение:</b> изолируйте IoT в гостевой сети, меняйте пароли устройств.</p>
+      `
+    }
+  };
+
+  function openModal(key) {
+    const data = threats[key];
+    document.getElementById('modalIcon').textContent = data.icon;
+    document.getElementById('modalTitle').textContent = data.title;
+    document.getElementById('modalContent').innerHTML = data.content;
+    
+    const riskLabels = {
+      high: 'Высокий риск',
+      medium: 'Средний риск',
+      low: 'Низкий риск'
+    };
+    document.getElementById('modalRisk').innerHTML = 
+      `<span class="risk-badge risk-${data.risk}">${riskLabels[data.risk]}</span>`;
+    
+    document.getElementById('modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal(e) {
+    if (e && e.target.id !== 'modal' && e.target.className !== 'modal-close') return;
+    document.getElementById('modal').classList.remove('active');
+    document.body.style.overflow = '';
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal({target: {id: 'modal'}});
+  });
+</script>
+
+</body>
+</html>
